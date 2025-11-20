@@ -1,0 +1,534 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Manajemen Pabrik Kelapa Sawit</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        /* Kustomisasi Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1; 
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #10B981; 
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #059669; 
+        }
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+    </style>
+</head>
+<body class="bg-gray-100 text-gray-800 font-sans">
+
+    <div class="flex h-screen overflow-hidden">
+        
+        <aside class="w-64 bg-emerald-900 text-white flex flex-col shadow-xl hidden md:flex">
+            <div class="p-6 flex items-center gap-3 border-b border-emerald-800">
+                <i class="fa-solid fa-leaf text-2xl text-emerald-400"></i>
+                <div>
+                    <h1 class="font-bold text-lg tracking-wide">SawitAnalytics</h1>
+                    <p class="text-xs text-emerald-300">Sistem Manajemen Perkebunan</p>
+                </div>
+            </div>
+            
+            <nav class="flex-1 py-6">
+                <a href="#" class="flex items-center px-6 py-3 bg-emerald-800 border-l-4 border-emerald-400 text-white">
+                    <i class="fa-solid fa-chart-line w-6"></i>
+                    <span class="font-medium">Dashboard Utama</span>
+                </a>
+                <a href="#tabel-data" class="flex items-center px-6 py-3 hover:bg-emerald-800 text-emerald-100 transition-colors">
+                    <i class="fa-solid fa-table w-6"></i>
+                    <span>Data Tabular</span>
+                </a>
+                <a href="#" class="flex items-center px-6 py-3 hover:bg-emerald-800 text-emerald-100 transition-colors">
+                    <i class="fa-solid fa-file-export w-6"></i>
+                    <span>Laporan</span>
+                </a>
+            </nav>
+
+            <div class="p-6 border-t border-emerald-800">
+                <div class="flex items-center gap-3">
+                    <div class="w-8 h-8 rounded-full bg-emerald-500 flex items-center justify-center font-bold">M</div>
+                    <div>
+                        <p class="text-sm font-medium">Manajer Pabrik</p>
+                        <p class="text-xs text-emerald-300">Admin</p>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <main class="flex-1 flex flex-col overflow-hidden relative">
+            <header class="bg-white shadow-sm p-4 flex justify-between items-center md:hidden z-20">
+                <div class="flex items-center gap-2 text-emerald-700 font-bold">
+                    <i class="fa-solid fa-leaf"></i> SawitAnalytics
+                </div>
+                <button class="text-gray-600"><i class="fa-solid fa-bars"></i></button>
+            </header>
+
+            <div class="flex-1 overflow-y-auto p-4 md:p-8">
+                
+                <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
+                    <div>
+                        <h2 class="text-2xl font-bold text-gray-800">Ringkasan Operasional</h2>
+                        <p class="text-gray-500 text-sm">Data real-time dari Blok 1 - 5</p>
+                    </div>
+                    <div class="flex gap-2">
+                        <select id="filterBloque" class="bg-white border border-gray-300 text-gray-700 py-2 px-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 shadow-sm text-sm">
+                            <option value="all">Semua Blok</option>
+                            </select>
+                        <button onclick="downloadCSV()" class="bg-emerald-600 hover:bg-emerald-700 text-white py-2 px-4 rounded-lg shadow-sm text-sm flex items-center gap-2 transition-all">
+                            <i class="fa-solid fa-download"></i> Unduh Data
+                        </button>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                    <div class="bg-white rounded-xl shadow-sm p-6 border-l-4 border-emerald-500 flex items-center justify-between">
+                        <div>
+                            <p class="text-sm text-gray-500 font-medium mb-1">Total Produksi</p>
+                            <h3 class="text-2xl font-bold text-gray-800" id="kpiProduksi">0 Ton</h3>
+                        </div>
+                        <div class="w-12 h-12 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-600">
+                            <i class="fa-solid fa-truck-ramp-box text-xl"></i>
+                        </div>
+                    </div>
+
+                    <div class="bg-white rounded-xl shadow-sm p-6 border-l-4 border-blue-500 flex items-center justify-between">
+                        <div>
+                            <p class="text-sm text-gray-500 font-medium mb-1">Total Pendapatan</p>
+                            <h3 class="text-2xl font-bold text-gray-800" id="kpiPendapatan">$0</h3>
+                        </div>
+                        <div class="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center text-blue-600">
+                            <i class="fa-solid fa-sack-dollar text-xl"></i>
+                        </div>
+                    </div>
+
+                    <div class="bg-white rounded-xl shadow-sm p-6 border-l-4 border-orange-500 flex items-center justify-between">
+                        <div>
+                            <p class="text-sm text-gray-500 font-medium mb-1">Rata-rata Harga/Ton</p>
+                            <h3 class="text-2xl font-bold text-gray-800" id="kpiHarga">$0</h3>
+                        </div>
+                        <div class="w-12 h-12 rounded-full bg-orange-100 flex items-center justify-center text-orange-600">
+                            <i class="fa-solid fa-tags text-xl"></i>
+                        </div>
+                    </div>
+
+                    <div class="bg-white rounded-xl shadow-sm p-6 border-l-4 border-purple-500 flex items-center justify-between">
+                        <div>
+                            <p class="text-sm text-gray-500 font-medium mb-1">Total Area</p>
+                            <h3 class="text-2xl font-bold text-gray-800" id="kpiArea">0 Ha</h3>
+                        </div>
+                        <div class="w-12 h-12 rounded-full bg-purple-100 flex items-center justify-center text-purple-600">
+                            <i class="fa-solid fa-map-location-dot text-xl"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+                    
+                    <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+                        <div class="flex justify-between items-center mb-4">
+                            <h3 class="font-bold text-gray-700 flex items-center gap-2">
+                                <i class="fa-solid fa-chart-line text-emerald-500"></i> Tren Produksi Bulanan
+                            </h3>
+                        </div>
+                        <div class="relative h-64">
+                            <canvas id="chartProductionTrend"></canvas>
+                        </div>
+                    </div>
+
+                    <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+                        <div class="flex justify-between items-center mb-4">
+                            <h3 class="font-bold text-gray-700 flex items-center gap-2">
+                                <i class="fa-solid fa-chart-simple text-emerald-500"></i> Produksi per Blok
+                            </h3>
+                        </div>
+                        <div class="relative h-64">
+                            <canvas id="chartBlockProduction"></canvas>
+                        </div>
+                    </div>
+
+                     <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+                        <div class="flex justify-between items-center mb-4">
+                            <h3 class="font-bold text-gray-700 flex items-center gap-2">
+                                <i class="fa-solid fa-money-bill-trend-up text-emerald-500"></i> Pendapatan vs Biaya Total
+                            </h3>
+                        </div>
+                        <div class="relative h-64">
+                            <canvas id="chartRevenueCost"></canvas>
+                        </div>
+                    </div>
+
+                    <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+                        <div class="flex justify-between items-center mb-4">
+                            <h3 class="font-bold text-gray-700 flex items-center gap-2">
+                                <i class="fa-solid fa-chart-pie text-emerald-500"></i> Proporsi Biaya
+                            </h3>
+                        </div>
+                        <div class="relative h-64 flex justify-center">
+                            <canvas id="chartCostDistribution"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="tabel-data" class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden mb-8">
+                    <div class="p-6 border-b border-gray-200 flex flex-col sm:flex-row justify-between items-center gap-4">
+                        <h3 class="font-bold text-lg text-gray-800">Detail Data Lapangan</h3>
+                        <input type="text" id="tableSearch" placeholder="Cari Lote atau Blok..." class="border border-gray-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 w-full sm:w-64">
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left text-sm text-gray-600">
+                            <thead class="bg-emerald-50 text-emerald-900 font-semibold uppercase text-xs">
+                                <tr>
+                                    <th class="px-6 py-4">Tanggal</th>
+                                    <th class="px-6 py-4">Blok</th>
+                                    <th class="px-6 py-4">Lote</th>
+                                    <th class="px-6 py-4 text-right">Prod (Ton)</th>
+                                    <th class="px-6 py-4 text-right">Yield (T/Ha)</th>
+                                    <th class="px-6 py-4 text-right">Biaya Total ($)</th>
+                                    <th class="px-6 py-4 text-right">Pendapatan ($)</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tableBody" class="divide-y divide-gray-100">
+                                </tbody>
+                        </table>
+                    </div>
+                    <div class="p-4 border-t border-gray-200 flex justify-center">
+                        <button id="btnLoadMore" class="text-emerald-600 hover:text-emerald-800 font-medium text-sm">Muat Lebih Banyak</button>
+                    </div>
+                </div>
+
+                <footer class="text-center text-gray-400 text-xs py-6">
+                    &copy; 2025 SawitAnalytics Platform. Didesain untuk efisiensi operasional.
+                </footer>
+
+            </div>
+        </main>
+    </div>
+
+    <script>
+        // 1. DATA EMBEDDED (Dari file CSV yang diunggah)
+        // Saya telah membatasi sebagian data agar file tidak terlalu besar, namun mencakup representasi semua blok.
+        const csvData = `Bloque,Lote,Área (ha),Fecha,Rendimiento (ton/ha),Producción (ton),Costo directo (USD/ha),Costo indirecto (USD/ha),Costo cosecha (USD/ton),Total directo (USD),Total indirecto (USD),Total cosecha (USD),Costo total (USD),Precio venta (USD/ton),Ingresos (USD)
+Bloque_1,Lote_1.1,21,2023-01-31,1.606,33.73,59.74,22.11,13.08,1254.51,464.21,441.27,2159.99,108.76,3668.20
+Bloque_1,Lote_1.1,21,2023-02-28,1.786,37.50,46.15,16.76,13.52,969.10,352.03,506.90,1828.03,111.64,4186.55
+Bloque_1,Lote_1.1,21,2023-03-31,1.946,40.86,55.22,16.72,13.47,1159.67,351.05,550.35,2061.07,108.83,4446.95
+Bloque_1,Lote_1.1,21,2023-04-30,2.065,43.36,52.49,17.51,12.52,1102.28,367.68,543.04,2013.00,124.87,5414.52
+Bloque_1,Lote_1.1,21,2023-05-31,2.043,42.91,66.34,17.69,13.47,1393.21,371.40,578.17,2342.78,129.13,5540.53
+Bloque_1,Lote_1.2,22,2023-01-31,1.615,35.53,54.81,12.98,12.93,1205.92,285.55,459.26,1950.73,100.07,3555.23
+Bloque_1,Lote_1.2,22,2023-02-28,1.582,34.80,55.60,25.39,13.81,1223.25,558.57,480.45,2262.28,113.02,3932.52
+Bloque_1,Lote_1.3,26,2023-01-31,1.600,41.61,39.39,24.00,12.80,1024.26,624.03,532.55,2180.83,122.01,5076.52
+Bloque_1,Lote_1.4,20,2023-01-31,1.878,37.57,47.82,17.36,14.31,956.31,347.19,537.62,1841.12,124.75,4686.63
+Bloque_2,Lote_2.1,27,2023-01-31,1.320,35.65,74.64,17.41,12.77,2015.35,470.03,455.39,2940.76,110.42,3936.34
+Bloque_2,Lote_2.2,25,2023-01-31,1.591,39.77,44.09,15.55,15.51,1102.15,388.72,616.86,2107.73,114.02,4534.84
+Bloque_2,Lote_2.3,28,2023-01-31,1.567,43.88,51.45,18.77,14.28,1440.59,525.63,626.81,2593.03,110.39,4843.76
+Bloque_3,Lote_3.1,20,2023-01-31,1.739,34.77,32.66,18.71,12.84,653.11,374.11,446.65,1473.88,113.19,3936.16
+Bloque_3,Lote_3.2,18,2023-01-31,1.782,32.07,79.56,20.94,14.25,1432.04,376.86,457.19,2266.09,105.21,3374.35
+Bloque_3,Lote_3.3,18,2023-01-31,1.490,26.82,55.82,17.70,14.92,1004.73,318.66,400.06,1723.45,107.10,2871.88
+Bloque_4,Lote_4.1,28,2023-01-31,1.409,39.45,64.62,17.84,13.22,1809.42,499.56,521.54,2830.52,106.29,4193.76
+Bloque_4,Lote_4.2,29,2023-01-31,1.590,46.12,66.99,12.19,12.75,1942.61,353.45,587.86,2883.92,113.49,5233.89
+Bloque_4,Lote_4.3,17,2023-01-31,1.578,26.82,55.27,14.15,13.57,939.64,240.56,364.11,1544.31,110.90,2974.78
+Bloque_4,Lote_4.4,20,2023-01-31,1.646,32.93,71.40,20.23,14.08,1427.99,404.53,463.44,2295.96,93.98,3094.33
+Bloque_5,Lote_5.1,18,2023-01-31,1.248,22.47,52.31,22.70,13.13,941.58,408.52,295.10,1645.20,102.81,2309.87
+Bloque_5,Lote_5.2,23,2023-01-31,1.650,37.96,69.20,16.20,12.13,1591.51,372.57,460.59,2424.67,120.08,4558.13
+Bloque_5,Lote_5.3,26,2023-01-31,1.487,38.67,60.80,21.03,12.51,1580.81,546.86,483.74,2611.41,120.15,4645.60
+Bloque_5,Lote_5.4,21,2023-01-31,1.688,35.44,53.15,16.14,14.15,1116.14,338.97,501.62,1956.73,117.66,4170.14
+Bloque_1,Lote_1.1,21,2024-01-31,1.644,34.52,64.31,20.03,14.70,1350.42,420.70,507.40,2278.52,111.74,3857.18
+Bloque_1,Lote_1.1,21,2024-02-29,1.855,38.95,46.04,17.66,15.47,966.77,370.94,602.52,1940.24,98.76,3846.78
+Bloque_1,Lote_1.1,21,2024-03-31,1.925,40.42,39.26,19.91,11.96,824.43,418.19,483.30,1725.92,120.69,4879.01
+Bloque_2,Lote_2.1,27,2024-01-31,1.353,36.53,61.41,15.56,15.85,1657.96,420.00,578.82,2656.78,112.66,4114.94
+Bloque_2,Lote_2.2,25,2024-01-31,1.709,42.74,63.04,17.53,15.08,1576.11,438.21,644.48,2658.80,91.55,3912.56
+Bloque_3,Lote_3.1,20,2024-01-31,1.757,35.14,64.63,18.92,13.55,1292.59,378.46,476.17,2147.22,110.67,3889.00
+Bloque_3,Lote_3.2,18,2024-01-31,1.774,31.93,47.51,20.60,15.13,855.25,370.88,483.15,1709.27,127.16,4060.32
+Bloque_4,Lote_4.1,28,2024-01-31,1.331,37.27,66.00,15.43,14.43,1847.97,431.92,537.92,2817.81,121.87,4542.08
+Bloque_4,Lote_4.5,18,2024-06-30,1.581,28.46,43.98,15.45,14.72,791.59,278.10,419.05,1488.75,101.38,2885.49
+Bloque_5,Lote_5.1,18,2024-06-30,1.263,22.73,63.23,17.76,13.49,1138.18,319.65,306.74,1764.58,104.27,2370.29
+`;
+
+        // 2. PARSING & PROCESSING
+        let allData = [];
+        let chartInstances = {};
+
+        function parseCSV(csv) {
+            const lines = csv.trim().split('\n');
+            const headers = lines[0].split(',');
+            
+            return lines.slice(1).map(line => {
+                const values = line.split(',');
+                let obj = {};
+                headers.forEach((header, i) => {
+                    obj[header.trim()] = values[i] ? values[i].trim() : "";
+                });
+                
+                // Convert numeric values
+                obj['Producción (ton)'] = parseFloat(obj['Producción (ton)']) || 0;
+                obj['Ingresos (USD)'] = parseFloat(obj['Ingresos (USD)']) || 0;
+                obj['Costo total (USD)'] = parseFloat(obj['Costo total (USD)']) || 0;
+                obj['Precio venta (USD/ton)'] = parseFloat(obj['Precio venta (USD/ton)']) || 0;
+                obj['Área (ha)'] = parseFloat(obj['Área (ha)']) || 0;
+                obj['Total directo (USD)'] = parseFloat(obj['Total directo (USD)']) || 0;
+                obj['Total indirecto (USD)'] = parseFloat(obj['Total indirecto (USD)']) || 0;
+                obj['Total cosecha (USD)'] = parseFloat(obj['Total cosecha (USD)']) || 0;
+                
+                // Clean Date (remove time if exists)
+                obj['Fecha'] = obj['Fecha'].split(' ')[0]; 
+                
+                return obj;
+            });
+        }
+
+        function processData(data) {
+            const totalProduction = data.reduce((sum, row) => sum + row['Producción (ton)'], 0);
+            const totalRevenue = data.reduce((sum, row) => sum + row['Ingresos (USD)'], 0);
+            const totalArea = data.reduce((sum, row) => sum + row['Área (ha)'], 0);
+            // Average Price weighted or simple? Simple average for dashboard overview is acceptable
+            const avgPrice = data.reduce((sum, row) => sum + row['Precio venta (USD/ton)'], 0) / (data.length || 1);
+
+            return {
+                totalProduction,
+                totalRevenue,
+                totalArea,
+                avgPrice
+            };
+        }
+
+        function updateKPIs(metrics) {
+            document.getElementById('kpiProduksi').innerText = metrics.totalProduction.toLocaleString('en-US', {maximumFractionDigits: 0}) + " Ton";
+            document.getElementById('kpiPendapatan').innerText = "$" + metrics.totalRevenue.toLocaleString('en-US', {maximumFractionDigits: 0});
+            document.getElementById('kpiHarga').innerText = "$" + metrics.avgPrice.toLocaleString('en-US', {maximumFractionDigits: 2});
+            document.getElementById('kpiArea').innerText = metrics.totalArea.toLocaleString('en-US', {maximumFractionDigits: 0}) + " Ha";
+        }
+
+        function groupDataBy(data, key) {
+            return data.reduce((acc, row) => {
+                if (!acc[row[key]]) acc[row[key]] = { prod: 0, revenue: 0, cost: 0, direct: 0, indirect: 0, harvest: 0 };
+                acc[row[key]].prod += row['Producción (ton)'];
+                acc[row[key]].revenue += row['Ingresos (USD)'];
+                acc[row[key]].cost += row['Costo total (USD)'];
+                acc[row[key]].direct += row['Total directo (USD)'];
+                acc[row[key]].indirect += row['Total indirecto (USD)'];
+                acc[row[key]].harvest += row['Total cosecha (USD)'];
+                return acc;
+            }, {});
+        }
+
+        // 3. CHARTS RENDERING
+        function renderCharts(data) {
+            // Destroy existing charts if any
+            Object.values(chartInstances).forEach(chart => chart.destroy());
+
+            // A. Production Trend (Line)
+            const byDate = groupDataBy(data, 'Fecha');
+            const sortedDates = Object.keys(byDate).sort();
+            const ctxTrend = document.getElementById('chartProductionTrend').getContext('2d');
+            
+            chartInstances.trend = new Chart(ctxTrend, {
+                type: 'line',
+                data: {
+                    labels: sortedDates,
+                    datasets: [{
+                        label: 'Produksi (Ton)',
+                        data: sortedDates.map(d => byDate[d].prod),
+                        borderColor: '#10B981', // Emerald 500
+                        backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                        fill: true,
+                        tension: 0.4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: { y: { beginAtZero: true } }
+                }
+            });
+
+            // B. Block Production (Bar)
+            const byBlock = groupDataBy(data, 'Bloque');
+            const blocks = Object.keys(byBlock).sort();
+            const ctxBlock = document.getElementById('chartBlockProduction').getContext('2d');
+
+            chartInstances.block = new Chart(ctxBlock, {
+                type: 'bar',
+                data: {
+                    labels: blocks,
+                    datasets: [{
+                        label: 'Produksi (Ton)',
+                        data: blocks.map(b => byBlock[b].prod),
+                        backgroundColor: '#059669', // Emerald 600
+                        borderRadius: 6
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                }
+            });
+
+            // C. Revenue vs Cost (Line/Multi-axis)
+            const ctxRevCost = document.getElementById('chartRevenueCost').getContext('2d');
+            chartInstances.revCost = new Chart(ctxRevCost, {
+                type: 'line',
+                data: {
+                    labels: sortedDates,
+                    datasets: [
+                        {
+                            label: 'Pendapatan ($)',
+                            data: sortedDates.map(d => byDate[d].revenue),
+                            borderColor: '#3B82F6', // Blue 500
+                            backgroundColor: '#3B82F6',
+                            yAxisID: 'y',
+                        },
+                        {
+                            label: 'Total Biaya ($)',
+                            data: sortedDates.map(d => byDate[d].cost),
+                            borderColor: '#EF4444', // Red 500
+                            backgroundColor: '#EF4444',
+                            yAxisID: 'y',
+                            borderDash: [5, 5]
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    interaction: { mode: 'index', intersect: false },
+                }
+            });
+
+            // D. Cost Distribution (Pie)
+            // Aggregate total costs
+            const totalDirect = data.reduce((sum, r) => sum + r['Total directo (USD)'], 0);
+            const totalIndirect = data.reduce((sum, r) => sum + r['Total indirecto (USD)'], 0);
+            const totalHarvest = data.reduce((sum, r) => sum + r['Total cosecha (USD)'], 0);
+            
+            const ctxPie = document.getElementById('chartCostDistribution').getContext('2d');
+            chartInstances.pie = new Chart(ctxPie, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Biaya Langsung', 'Biaya Tidak Langsung', 'Biaya Panen'],
+                    datasets: [{
+                        data: [totalDirect, totalIndirect, totalHarvest],
+                        backgroundColor: ['#10B981', '#F59E0B', '#6366F1'],
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    cutout: '70%',
+                    plugins: {
+                        legend: { position: 'bottom' }
+                    }
+                }
+            });
+        }
+
+        // 4. TABLE RENDERING
+        function renderTable(data, limit = 10) {
+            const tbody = document.getElementById('tableBody');
+            tbody.innerHTML = '';
+            
+            data.slice(0, limit).forEach(row => {
+                const tr = document.createElement('tr');
+                tr.className = "hover:bg-emerald-50 transition-colors";
+                tr.innerHTML = `
+                    <td class="px-6 py-4 font-medium text-gray-900">${row['Fecha']}</td>
+                    <td class="px-6 py-4">${row['Bloque']}</td>
+                    <td class="px-6 py-4">${row['Lote']}</td>
+                    <td class="px-6 py-4 text-right font-bold text-emerald-600">${row['Producción (ton)'].toFixed(2)}</td>
+                    <td class="px-6 py-4 text-right">${row['Rendimiento (ton/ha)']}</td>
+                    <td class="px-6 py-4 text-right text-red-500">$${row['Costo total (USD)'].toFixed(0)}</td>
+                    <td class="px-6 py-4 text-right text-blue-600">$${row['Ingresos (USD)'].toFixed(0)}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        // 5. INITIALIZATION & EVENTS
+        window.onload = function() {
+            allData = parseCSV(csvData);
+            
+            // Populate Filter Options
+            const uniqueBlocks = [...new Set(allData.map(d => d['Bloque']))].sort();
+            const filterSelect = document.getElementById('filterBloque');
+            uniqueBlocks.forEach(block => {
+                const option = document.createElement('option');
+                option.value = block;
+                option.textContent = block.replace('_', ' ');
+                filterSelect.appendChild(option);
+            });
+
+            // Initial Render
+            const kpi = processData(allData);
+            updateKPIs(kpi);
+            renderCharts(allData);
+            renderTable(allData);
+
+            // Filter Event
+            filterSelect.addEventListener('change', (e) => {
+                const selected = e.target.value;
+                let filteredData = allData;
+                if (selected !== 'all') {
+                    filteredData = allData.filter(d => d['Bloque'] === selected);
+                }
+                updateKPIs(processData(filteredData));
+                renderCharts(filteredData);
+                renderTable(filteredData);
+            });
+
+            // Search Event
+            document.getElementById('tableSearch').addEventListener('keyup', (e) => {
+                const term = e.target.value.toLowerCase();
+                const searchData = allData.filter(d => 
+                    d['Lote'].toLowerCase().includes(term) || 
+                    d['Bloque'].toLowerCase().includes(term)
+                );
+                renderTable(searchData);
+            });
+            
+            // Load More Button (Simple implementation)
+            let currentLimit = 10;
+            document.getElementById('btnLoadMore').addEventListener('click', () => {
+                currentLimit += 10;
+                renderTable(allData, currentLimit);
+            });
+        };
+
+        // CSV Download Function
+        function downloadCSV() {
+            let csvContent = "data:text/csv;charset=utf-8,";
+            // Header
+            csvContent += Object.keys(allData[0]).join(",") + "\r\n";
+            // Rows
+            allData.forEach(row => {
+                let rowStr = Object.values(row).join(",");
+                csvContent += rowStr + "\r\n";
+            });
+            
+            var encodedUri = encodeURI(csvContent);
+            var link = document.createElement("a");
+            link.setAttribute("href", encodedUri);
+            link.setAttribute("download", "data_sawit_export.csv");
+            document.body.appendChild(link);
+            link.click();
+        }
+    </script>
+</body>
+</html>
